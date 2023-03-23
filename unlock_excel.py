@@ -5,59 +5,112 @@ import tempfile
 import shutil
 import logging
 import argparse
+from tqdm import tqdm
 
-def main(source_path):
-    # Get the paths of all Excel files in the Data sources folder
-    excel_files = pathlib.Path(source_path).glob("*.xls*")
-
-    # Loop through the list of Excel files and call the 'unlock' method on each of them to remove the password
-    for file in excel_files:
-        logger.info(f"Processing: {file}")
-        try:
-            unlock(file, "***REMOVED***", "logger")
-            logger.info(f"File {file} successfully unlocked, and original file was overwritten.")
-        except Exception as e:
-            logger.error(f"Could not unlock {file}. Exception: {e}")
-            logger.warning(f"Could not unlock {file}. File may be already unprotected.")
-
-if __name__ == "__main__":
-    # Set up argument parsing
-    parser = argparse.ArgumentParser(description="Unlock Excel files in the specified folder.")
-    parser.add_argument("source_path", help="Path to the folder containing the Excel files.")
-    args = parser.parse_args()
-
-    # Set up logging
-    logging.basicConfig(
-        filename="runtime.log",
-        level=logging.DEBUG,
-        format="%(asctime)s - %(levelname)s - %(message)s",
-    )
-    logger = logging.getLogger("logger")
-
-    # Call the main function with the parsed source_path
-    main(args.source_path)
+# Exception imports
+from msoffcrypto.exceptions import FileFormatError, ParseError, DecryptionError, InvalidKeyError
 
 def unlock(filename, passwd, loggername):
-    logger = logging.getLogger(loggername) 
+    logger = logging.getLogger(loggername)
     temp = open(filename, "rb")
-    excel = msoffcrypto.OfficeFile(temp)
-    excel.load_key(passwd)
 
-    # Create a temporary file for the decrypted content
-    with tempfile.NamedTemporaryFile(delete=False) as f:
-        try:
-            excel.decrypt(f)
-        except Exception as e:
-            logger.error(f"Error during decryption of {filename}: {e}")
+    try:
+        excel = msoffcrypto.OfficeFile(temp)
+
+        if not excel.is_encrypted():
+            logger.info(f"Not encrypted: {filename}")
             temp.close()
-            os.unlink(f.name)  # Remove the temporary file if an error occurs
-            return
+            return "unencrypted"
+
+        excel.load_key(passwd)
+    except FileFormatError as e:
+        logger.warning(f"Unsupported format: {filename}, {e}")
+        temp.close()
+        return None
+    except ParseError as e:
+        logger.warning(f"Parse error: {filename}, {e}")
+        temp.close()
+        return None
+    except DecryptionError as e:
+        logger.warning(f"Decryption error: {filename}, {e}")
+        temp.close()
+        return None
+    except InvalidKeyError as e:
+        logger.warning(f"Invalid key error: {filename}, {e}")
+        temp.close()
+        return None
+    except Exception as e:
+        logger.error(f"Error: {filename}, {e}")
+        temp.close()
+        return None
+
+    logger.info(f"Unlocked: {filename}")
+
+    # The rest of the function remains the same
+
+    with tempfile.TemporaryFile() as fout:
+        excel.decrypt(fout)
+        fout.seek(0)
+        original_metadata = os.stat(filename)
+        shutil.copyfileobj(fout, open(filename, "wb"))
+
+        # Update the file metadata
+        os.utime(str(filename), ns=(original_metadata.st_atime_ns, original_metadata.st_mtime_ns))
 
     temp.close()
+    return "decrypted"
 
-    # Preserve file access, modification, and creation times
-    original_metadata = os.stat(str(filename))
-    os.utime(f.name, ns=(original_metadata.st_atime_ns, original_metadata.st_mtime_ns, original_metadata.st_ctime_ns))
+def main():
+    parser = argparse.ArgumentParser(description="Unlock Excel files.")
+    parser.add_argument("path", help="Path to the folder containing Excel files.")
+    parser.add_argument("-R", "--recursive", action="store_true", help="Recursively process subfolders.")
+    parser.add_argument("-p", "--password", help="Password for decryption.")
+    parser.add_argument("--plist", help="Path to a .txt file containing a list of passwords.")
+    args = parser.parse_args()
 
-    # Replace the original file with the decrypted file
-    shutil.move(f.name, str(filename))
+    if not args.password and not args.plist:
+        parser.error("Either --password or --plist must be provided")
+
+    if args.password:
+        passwords = [args.password]
+    else:
+        with open(args.plist, "r") as f:
+            passwords = [line.strip() for line in f.readlines()]
+
+    path = pathlib.Path(args.path)
+    if not path.is_dir():
+        print(f"'{args.path}' is not a valid directory")
+        return
+
+    logging.basicConfig(level=logging.INFO, handlers=[logging.NullHandler()])
+    logger = logging.getLogger("excel_unlocker")
+
+    decrypted_count = 0
+    unencrypted_count = 0
+
+    if args.recursive:
+        all_files = [(os.path.join(root, file), file)
+                     for root, _, files in os.walk(args.path)
+                     for file in files
+                     if file.endswith(".xls")]
+    else:
+        all_files = [(str(file), file.name) for file in path.glob("*.xls")]
+
+    with tqdm(total=len(all_files), unit="file") as progress_bar:
+        for filepath, filename in all_files:
+            progress_bar.set_description(f"Processing: {filename}")
+            for password in passwords:
+                result = unlock(filepath, password, "excel_unlocker")
+                if result == "decrypted":
+                    decrypted_count += 1
+                    break
+                elif result == "unencrypted":
+                    unencrypted_count += 1
+                    break
+            progress_bar.update(1)
+
+    print(f"\nDecrypted files: {decrypted_count}")
+    print(f"Unencrypted files: {unencrypted_count}")
+
+if __name__ == "__main__":
+    main()
