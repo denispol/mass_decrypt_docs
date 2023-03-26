@@ -82,4 +82,4 @@ An error will be triggered and the program will stop in case of a damaged file.
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
