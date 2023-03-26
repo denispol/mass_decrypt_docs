@@ -1,59 +1,81 @@
-# Excel Unlocker
+# Mass Decrypt
 
-Excel Unlocker is a command-line tool that helps decrypt password-protected Excel files in batch. It supports both single password input and a list of passwords provided in a text file.
+Mass Decrypt is a command-line tool for batch decryption of Microsoft Office and PDF files in a specified directory on Windows systems.
 
 ## Features
 
-- Decrypt multiple Excel files in a directory
-- Decrypt Excel files recursively in subdirectories
-- Use a single password or multiple passwords from a text file
-- Progress bar displaying the current file being processed
-- Summary of the total number of decrypted and unencrypted files
+- Decrypt Office files (DOC, DOCX, DOCM, XLS, XLSX, XLSM, XLSB) and PDF files.
+- Use a single password or a list of passwords stored in a text file.
+- Recursively process files in subdirectories.
+- Perform integrity checks on decrypted PDF files (optional).
+
+## Requirements
+
+- Python 3.7 or higher
+- [msoffcrypto-tool](https://github.com/nolze/msoffcrypto-tool) library for Office file decryption
+- [pikepdf](https://github.com/pikepdf/pikepdf) library for PDF file decryption
+
+This program is designed to run on Windows systems only.
 
 ## Installation
 
 1. Clone the repository:
+
 ```git
-git clone https://github.com/denispol/excel_unlocker.git
+git clone https://github.com/yourusername/mass_decrypt.git
 ```
 
-2. Install required libraries:
-```python
+2. Create a virtual environment and activate it:
+
+```console
+python -m venv venv
+.\venv\Scripts\activate
+```
+
+3. Install the required packages:
+
+```console
 pip install -r requirements.txt
+```
+
+4. Install the package:
+
+```console
+pip install .
 ```
 
 ## Usage
 
-Basic usage:
-```python
-python unlock_excel.py <path-to-folder> -p <password>
+To run Mass Decrypt, use the following command:
+
+```console
+mass_decrypt [OPTIONS]
 ```
 
-Use a list of passwords from a text file:
-```python
-python unlock_excel.py <path-to-folder> --plist <path-to-passwords.txt>
+### Options
+
+- `path`: Path to the folder containing Office and/or PDF files.
+- `-R`, `--recursive`: Recursively process subfolders.
+- `-p`, `--password`: Password for decryption.
+- `--plist`: Path to a .txt file containing a list of passwords.
+- `-P`, `--pdf`: Decrypt PDF files in the specified folders and subfolders.
+- `-O`, `--office`: Decrypt Office files in the specified folders and subfolders.
+- `--integrity-check`: Perform an integrity check for decrypted PDF files (optional).
+
+**Note**: Either `--password` or `--plist` must be provided.
+
+## Example
+
+```console
+mass_decrypt -R -P -O --integrity-check --plist passwords.txt C:\path\to\folder
 ```
 
-Process subdirectories recursively:
-```python
-python unlock_excel.py <path-to-folder> -R -p <password>
-```
+This command will process all Office and PDF files in the specified folder and its subfolders, attempting to decrypt them using the passwords listed in `passwords.txt`. It will also perform an integrity check for decrypted PDF files.
 
-For a complete list of options, use the help:
-```python
-python unlock_excel.py -h
-```
+## Notes
 
-# Example
-Decrypt all Excel files in the "example" folder using a single password:
-```python
-python unlock_excel.py example -p mysecretpassword
-```
+Test units are still being developed, and will be introduced as new features are developed. Please note that although this program should not break PDF or Office files, we do not recommend to run it in a production environment.
 
-Decrypt all Excel files in the "example" folder using a list of passwords from "passwords.txt":
-```python
-python unlock_excel.py example --plist passwords.txt
-```
+## License
 
-# License
-This project is released under the MIT License. See LICENSE for more information.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
