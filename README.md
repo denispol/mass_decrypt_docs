@@ -24,7 +24,7 @@ This program is designed to run on Windows systems only.
 
 1. Clone the repository:
 
-```git
+```console
 git clone https://github.com/yourusername/mass_decrypt.git
 ```
 
