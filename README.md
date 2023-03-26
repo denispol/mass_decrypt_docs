@@ -1,6 +1,7 @@
 # Mass Decrypt
 
 Mass Decrypt is a command-line tool for batch decryption of Microsoft Office and PDF files in a specified directory on Windows systems.
+The creation, modification and last access times are preserved from the encrypted files in the decrypted files.
 
 ## Features
 
@@ -75,6 +76,7 @@ This command will process all Office and PDF files in the specified folder and i
 ## Notes
 
 Test units are still being developed, and will be introduced as new features are developed. Please note that although this program should not break PDF or Office files, we do not recommend to run it in a production environment.
+An error will be trigerred and the program will stop in case of a damaged file.
 
 ## License
 
