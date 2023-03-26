@@ -15,6 +15,8 @@ The creation, modification and last access times are preserved from the encrypte
 - Python 3.7 or higher
 - [msoffcrypto-tool](https://github.com/nolze/msoffcrypto-tool) library for Office file decryption
 - [pikepdf](https://github.com/pikepdf/pikepdf) library for PDF file decryption
+- [tqdm](https://github.com/tqdm/tqdm) library for progress display
+- [xlrd](https://github.com/python-excel/xlrd.git) library for Excel file manipulation (used instead of openpyxl to be able to interact with .xls files)
 
 This program is designed to run on Windows systems only.
 
