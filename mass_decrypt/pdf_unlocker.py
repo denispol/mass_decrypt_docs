@@ -40,9 +40,6 @@ class PDFUnlocker:
             result = "unencrypted"
         except pikepdf.PasswordError as e:
             self.logger.warning(f"File is encrypted: {filename}, {e}")
-        except Exception as e:
-            self.logger.error(f"Error: {filename}, {e}")
-            result = "other_error"
 
             try:
                 pdf = pikepdf.open(
