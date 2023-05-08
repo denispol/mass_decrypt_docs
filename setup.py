@@ -33,7 +33,8 @@ setup(
         "msoffcrypto-tool",
         "pikepdf",
         "openpyxl",
-        "xlrd"
+        "xlrd",
+        "tqdm"
     ],
     
 )
