@@ -24,7 +24,7 @@ This program is designed to run on Windows systems only.
 
 1. Clone the repository:
 
-```git
+```console
 git clone https://github.com/yourusername/mass_decrypt.git
 ```
 
@@ -78,8 +78,8 @@ This command will process all Office and PDF files in the specified folder and i
 ## Notes
 
 Test units are still being developed, and will be introduced as new features are developed. Please note that although this program should not break PDF or Office files, we do not recommend to run it in a production environment.
-An error will be trigerred and the program will stop in case of a damaged file.
+An error will be triggered and the program will stop in case of a damaged file.
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
