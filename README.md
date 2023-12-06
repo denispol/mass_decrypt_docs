@@ -25,7 +25,7 @@ This program is designed to run on Windows systems only.
 1. Clone the repository:
 
 ```console
-git clone https://github.com/yourusername/mass_decrypt.git
+git clone https://github.com/denispol/mass_decrypt.git
 ```
 
 2. Create a virtual environment and activate it:
