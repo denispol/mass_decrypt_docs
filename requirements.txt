@@ -1,4 +1,4 @@
 msoffcrypto-tool==5.0.1
 pikepdf==7.1.1
-tqdm==4.65.0
+tqdm==4.66.3
 xlrd==2.0.1
